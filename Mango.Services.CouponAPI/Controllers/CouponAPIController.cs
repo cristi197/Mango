@@ -28,7 +28,7 @@ namespace Mango.Services.CouponAPI.Controllers
             try
             {
                 IEnumerable<Coupon> coupons = _appDbContext.Coupons.ToList();
-                _responseDto.Result = _mapper.Map<IEnumerable<CouponDTO>>(coupons);
+                _responseDto.Result = _mapper.Map<IEnumerable<CouponDto>>(coupons);
             }
             catch (Exception ex)
             {
@@ -45,7 +45,7 @@ namespace Mango.Services.CouponAPI.Controllers
             try
             {
                 Coupon coupons = _appDbContext.Coupons.First(u => u.CouponId == id);
-                _responseDto.Result = _mapper.Map<CouponDTO>(coupons);
+                _responseDto.Result = _mapper.Map<CouponDto>(coupons);
             }
             catch (Exception ex)
             {
@@ -63,7 +63,7 @@ namespace Mango.Services.CouponAPI.Controllers
             {
                 Coupon coupons = _appDbContext.Coupons.First(u => u.CouponCode.ToLower() == code.ToLower());
 
-                _responseDto.Result = _mapper.Map<CouponDTO>(coupons);
+                _responseDto.Result = _mapper.Map<CouponDto>(coupons);
             }
             catch (Exception ex)
             {
@@ -74,17 +74,17 @@ namespace Mango.Services.CouponAPI.Controllers
         }
 
         [HttpPost]
-        public ResponseDto Post([FromBody] CouponDTO couponDTO)
+        public ResponseDto Post([FromBody] CouponDto couponDto)
         {
             try
             {
-                Coupon coupon = _mapper.Map<Coupon>(couponDTO);
+                Coupon coupon = _mapper.Map<Coupon>(couponDto);
 
                 _appDbContext.Coupons.Add(coupon);
 
                 _appDbContext.SaveChanges();
 
-                _responseDto.Result = _mapper.Map<CouponDTO>(coupon);
+                _responseDto.Result = _mapper.Map<CouponDto>(coupon);
             }
             catch (Exception ex)
             {
@@ -95,17 +95,17 @@ namespace Mango.Services.CouponAPI.Controllers
         }
 
         [HttpPut]
-        public ResponseDto Put([FromBody] CouponDTO couponDTO)
+        public ResponseDto Put([FromBody] CouponDto couponDto)
         {
             try
             {
-                Coupon coupon = _mapper.Map<Coupon>(couponDTO);
+                Coupon coupon = _mapper.Map<Coupon>(couponDto);
 
                 _appDbContext.Coupons.Update(coupon);
 
                 _appDbContext.SaveChanges();
 
-                _responseDto.Result = _mapper.Map<CouponDTO>(coupon);
+                _responseDto.Result = _mapper.Map<CouponDto>(coupon);
             }
             catch (Exception ex)
             {
