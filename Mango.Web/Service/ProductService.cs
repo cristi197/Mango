@@ -1,5 +1,4 @@
 ﻿using Mango.Web.Models;
-using Mango.Web.Models.Dto;
 using Mango.Web.Service.IService;
 using Mango.Web.Utility;
 
@@ -28,7 +27,7 @@ namespace Mango.Web.Service
             return await _baseService.SendAsync(new RequestDto
             {
                 ApiType = SD.ApiType.DELETE,
-                Url = SD.ProductAPIBase + "/api/product"
+                Url = SD.ProductAPIBase + "/api/product/" + id
             });
         }
 

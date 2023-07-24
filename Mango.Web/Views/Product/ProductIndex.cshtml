@@ -1,4 +1,4 @@
-﻿@using Mango.Web.Models.Dto;
+﻿@using Mango.Web.Models;
 @model IEnumerable<ProductDto>
 
 <div class="card shadow border-0 mt-4">
@@ -44,13 +44,13 @@
 							@item.CategoryName
 						</td>
 						<td>
-							@item.Price
+							@((item.Price).ToString("c"))
 						</td>
 						<td>
-							<a class="btn btn-success">
+							<a class="btn btn-success" asp-action="ProductEdit" asp-route-productId=@item.ProductId>
 								<i class="bi bi-pencil-square"></i>
 							</a>
-							<a class="btn btn-danger">
+							<a class="btn btn-danger"  asp-action="ProductDelete" asp-route-productId=@item.ProductId>
 								<i class="bi bi-trash"></i>
 							</a>
 						</td>
