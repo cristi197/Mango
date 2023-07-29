@@ -16,11 +16,11 @@ namespace Mango.Services.OrderAPI.Extensions
 
             var key = Encoding.ASCII.GetBytes(secret);
 
+
             builder.Services.AddAuthentication(x =>
             {
                 x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-
             }).AddJwtBearer(x =>
             {
                 x.TokenValidationParameters = new TokenValidationParameters

@@ -1,5 +1,7 @@
-﻿
-namespace Mango.Services.OrderAPI.Models.Dto
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
+
+namespace Mango.Web.Models
 {
     public class OrderDetailsDto
     {

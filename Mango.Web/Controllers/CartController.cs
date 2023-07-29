@@ -10,9 +10,11 @@ namespace Mango.Web.Controllers
     public class CartController : Controller
     {
         private readonly ICartService _cartService;
-        public CartController(ICartService cartService)
+        private readonly IOrderService _orderService;
+        public CartController(ICartService cartService, IOrderService orderService)
         {
             _cartService = cartService;
+            _orderService = orderService;
         }
         [Authorize]
         public async Task<IActionResult> CartIndex()
@@ -25,6 +27,26 @@ namespace Mango.Web.Controllers
         {
             return View(await LoadCartDtoBasedOnLoggedInUser());
         }
+        [HttpPost]
+        [ActionName("Checkout")]
+        public async Task<IActionResult> Checkout(CartDto cartDto)
+        {
+
+            CartDto cart = await LoadCartDtoBasedOnLoggedInUser();
+            cart.CartHeader.Phone = cartDto.CartHeader.Phone;
+            cart.CartHeader.Email = cartDto.CartHeader.Email;
+            cart.CartHeader.Name = cartDto.CartHeader.Name;
+
+            var response = await _orderService.CreateOrder(cart);
+            OrderHeaderDto orderHeaderDto = JsonConvert.DeserializeObject<OrderHeaderDto>(Convert.ToString(response.Result));
+
+            if (response != null && response.IsSuccess)
+            {
+                //get stripe session and redirect to stripe to place order
+                return RedirectToAction(nameof(CartIndex));
+            }
+            return View();
+        }
 
         public async Task<IActionResult> Remove(int cartDetailsId)
         {
@@ -34,7 +56,7 @@ namespace Mango.Web.Controllers
             if (response != null && response.IsSuccess)
             {
                 TempData["success"] = "Cart updated successfully";
-                return RedirectToAction(nameof(CartIndex)); 
+                return RedirectToAction(nameof(CartIndex));
             }
             return View();
         }
@@ -86,7 +108,7 @@ namespace Mango.Web.Controllers
             var userId = User.Claims.Where(u => u.Type == JwtRegisteredClaimNames.Sub)?.FirstOrDefault()?.Value;
             ResponseDto? response = await _cartService.GetCartByUserIdAsync(userId);
 
-            if(response != null && response.IsSuccess)
+            if (response != null && response.IsSuccess)
             {
                 CartDto cartDto = JsonConvert.DeserializeObject<CartDto>(Convert.ToString(response.Result));
                 return cartDto;

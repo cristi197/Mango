@@ -1,19 +1,20 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using System.Net.Http.Headers;
 
-namespace Mango.Services.ShoppingCartAPI.Utility
+namespace Mango.Services.OrderAPI.Utility 
 {
     public class BackendApiAuthenticationHttpClientHandler : DelegatingHandler
     {
-        private readonly IHttpContextAccessor _contextAccessor;
-        public BackendApiAuthenticationHttpClientHandler(IHttpContextAccessor contextAccessor)
+        private readonly IHttpContextAccessor _accessor;
+
+        public BackendApiAuthenticationHttpClientHandler(IHttpContextAccessor accessor)
         {
-            _contextAccessor = contextAccessor;
+            _accessor = accessor;
         }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            var token = await _contextAccessor.HttpContext.GetTokenAsync("access_token");
+            var token = await _accessor.HttpContext.GetTokenAsync("access_token");
 
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
