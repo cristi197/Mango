@@ -20,7 +20,7 @@ namespace Mango.Services.RewardAPI.Messaging
             _configuration = configuration;
             serviceBusConnectionString = _configuration.GetValue<string>("ServiceBusConnectionString");
             orderCreatedTopic = _configuration.GetValue<string>("TopicAndQueueNames:OrderCreatedTopic");
-            orderCreatedRewardSubscription = _configuration.GetValue<string>("TopicAndQueueNames:OrderCreatedRewardsUpdate");
+            orderCreatedRewardSubscription = _configuration.GetValue<string>("TopicAndQueueNames:OrderCreated_Rewards_Subscription");
 
             var client = new ServiceBusClient(serviceBusConnectionString);
             _rewardProcessor = client.CreateProcessor(orderCreatedTopic, orderCreatedRewardSubscription);
