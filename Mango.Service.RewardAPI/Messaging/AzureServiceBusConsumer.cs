@@ -49,7 +49,6 @@ namespace Mango.Services.RewardAPI.Messaging
             RewardsMessage objMessage = JsonConvert.DeserializeObject<RewardsMessage>(body);
             try
             {
-                //try to log email
                 await _rewardService.UpdateRewards(objMessage);
                 await args.CompleteMessageAsync(args.Message);
             }
