@@ -53,7 +53,7 @@ namespace Mango.Services.OrderAPI.Controllers
                     orderHeaders = _db.OrderHeaders.Include(u => u.OrderDetails).Where(u => u.UserId == userId).OrderByDescending(u => u.OrderHeaderId).ToList();
                 }
 
-                _response.Result = _mapper.Map<IEnumerable<OrderHeaderDto>>(orderHeaders);  
+                _response.Result = _mapper.Map<IEnumerable<OrderHeaderDto>>(orderHeaders);
             }
             catch (Exception ex)
             {
@@ -203,6 +203,41 @@ namespace Mango.Services.OrderAPI.Controllers
                     await _messageBus.PublishMessage(rewardsDto, topicName);
 
                     _response.Result = _mapper.Map<OrderHeaderDto>(orderHeader);
+                }
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.Message = ex.Message;
+            }
+
+            return _response;
+        }
+
+        [Authorize]
+        [HttpPost("UpdateOrderStatus/{orderId:int}")]
+        public async Task<ResponseDto> UpdateOrderStatus(int orderId, [FromBody] string newStatus)
+        {
+            try
+            {
+                OrderHeader orderHeader = _db.OrderHeaders.First(u => u.OrderHeaderId == orderId);
+
+                if (orderHeader is not null)
+                {
+                    if (newStatus == SD.Status_Cancelled)
+                    {
+                        //give refund
+                        var options = new RefundCreateOptions
+                        {
+                            Reason = RefundReasons.RequestedByCustomer,
+                            PaymentIntent = orderHeader.PaymentIntentId
+                        };
+
+                        var service = new RefundService();
+                        Refund refund = service.Create(options);
+                    }
+                    orderHeader.Status = newStatus;
+                    _db.SaveChanges();
                 }
             }
             catch (Exception ex)
