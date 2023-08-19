@@ -87,7 +87,7 @@ namespace Mango.Services.ProductAPI.Controllers
 
                 _appDbContext.SaveChanges();
 
-                if(productDto.Image != null)
+                if (productDto.Image != null)
                 {
                     string fileName = product.ProductId + Path.GetExtension(productDto.Image.FileName);
                     string filePath = @"wwwroot\ProductImages\" + fileName;
@@ -122,11 +122,39 @@ namespace Mango.Services.ProductAPI.Controllers
 
         [HttpPut]
         [Authorize(Roles = "ADMIN")]
-        public ResponseDto Put([FromBody] ProductDto productDto)
+        public ResponseDto Put(ProductDto productDto)
         {
             try
             {
                 Product product = _mapper.Map<Product>(productDto);
+
+                if (productDto.Image != null)
+                {
+                    // we want to upload a new image, so we need to remove the old one
+                    if (!string.IsNullOrEmpty(product.ImageLocalPath))
+                    {
+                        var oldFilePathDirectory = Path.Combine(Directory.GetCurrentDirectory(), product.ImageLocalPath);
+                        FileInfo fileInfo = new FileInfo(oldFilePathDirectory);
+
+                        if (fileInfo.Exists)
+                        {
+                            fileInfo.Delete();
+                        }
+                    }
+
+                    string fileName = product.ProductId + Path.GetExtension(productDto.Image.FileName);
+                    string filePath = @"wwwroot\ProductImages\" + fileName;
+                    var filePathDirectory = Path.Combine(Directory.GetCurrentDirectory(), filePath);
+
+                    using (var fileStream = new FileStream(filePathDirectory, FileMode.Create))
+                    {
+                        productDto.Image.CopyTo(fileStream);
+                    }
+
+                    var baseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host.Value}{HttpContext.Request.PathBase.Value}";
+                    product.ImageUrl = baseUrl + "/ProductImages/" + fileName;
+                    product.ImageLocalPath = filePath;
+                }
 
                 _appDbContext.Products.Update(product);
 
@@ -151,12 +179,12 @@ namespace Mango.Services.ProductAPI.Controllers
             {
                 Product product = _appDbContext.Products.First(u => u.ProductId == id);
 
-                if(!string.IsNullOrEmpty(product.ImageLocalPath))
+                if (!string.IsNullOrEmpty(product.ImageLocalPath))
                 {
-                    var oldFilePathDirectory = Path.Combine(Directory.GetCurrentDirectory(), product.ImageLocalPath);   
+                    var oldFilePathDirectory = Path.Combine(Directory.GetCurrentDirectory(), product.ImageLocalPath);
                     FileInfo fileInfo = new FileInfo(oldFilePathDirectory);
 
-                    if(fileInfo.Exists)
+                    if (fileInfo.Exists)
                     {
                         fileInfo.Delete();
                     }
