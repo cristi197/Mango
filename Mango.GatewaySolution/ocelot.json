@@ -179,7 +179,7 @@
     //ORDER API
 
     {
-      "DownstreamPathTemplate": "/api/order/GetOrders/{userId}",
+      "DownstreamPathTemplate": "/api/order/GetOrders?userId={id}",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -187,7 +187,7 @@
           "Port": 7004
         }
       ],
-      "UpstreamPathTemplate": "/api/order/GetOrders/{userId}",
+      "UpstreamPathTemplate": "/api/order/GetOrders/{id}",
       "UpstreamHttpMethod": [ "Get" ]
     },
     {
