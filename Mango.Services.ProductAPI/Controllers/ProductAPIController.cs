@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Azure;
 using Mango.Services.ProductAPI.Data;
 using Mango.Services.ProductAPI.Models;
 using Mango.Services.ProductAPI.Models.Dto;
@@ -77,27 +78,33 @@ namespace Mango.Services.ProductAPI.Controllers
 
         [HttpPost]
         [Authorize(Roles = "ADMIN")]
-        public ResponseDto Post(ProductDto productDto)
+        public ResponseDto Post(ProductDto ProductDto)
         {
             try
             {
-                Product product = _mapper.Map<Product>(productDto);
-
+                Product product = _mapper.Map<Product>(ProductDto);
                 _appDbContext.Products.Add(product);
-
                 _appDbContext.SaveChanges();
 
-                if (productDto.Image != null)
+                if (ProductDto.Image != null)
                 {
-                    string fileName = product.ProductId + Path.GetExtension(productDto.Image.FileName);
-                    string filePath = @"wwwroot\ProductImages\" + fileName;
-                    var filePathDirectory = Path.Combine(Directory.GetCurrentDirectory(), filePath);
 
-                    using (var fileStream = new FileStream(filePathDirectory, FileMode.Create))
+                    string fileName = product.ProductId + Path.GetExtension(ProductDto.Image.FileName);
+                    string filePath = @"wwwroot\ProductImages\" + fileName;
+
+                    //I have added the if condition to remove the any image with same name if that exist in the folder by any change
+                    var directoryLocation = Path.Combine(Directory.GetCurrentDirectory(), filePath);
+                    FileInfo file = new FileInfo(directoryLocation);
+                    if (file.Exists)
                     {
-                        productDto.Image.CopyTo(fileStream);
+                        file.Delete();
                     }
 
+                    var filePathDirectory = Path.Combine(Directory.GetCurrentDirectory(), filePath);
+                    using (var fileStream = new FileStream(filePathDirectory, FileMode.Create))
+                    {
+                        ProductDto.Image.CopyTo(fileStream);
+                    }
                     var baseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host.Value}{HttpContext.Request.PathBase.Value}";
                     product.ImageUrl = baseUrl + "/ProductImages/" + fileName;
                     product.ImageLocalPath = filePath;
@@ -106,10 +113,8 @@ namespace Mango.Services.ProductAPI.Controllers
                 {
                     product.ImageUrl = "https://placehold.co/600x400";
                 }
-
                 _appDbContext.Products.Update(product);
                 _appDbContext.SaveChanges();
-
                 _responseDto.Result = _mapper.Map<ProductDto>(product);
             }
             catch (Exception ex)
@@ -120,47 +125,44 @@ namespace Mango.Services.ProductAPI.Controllers
             return _responseDto;
         }
 
+
         [HttpPut]
         [Authorize(Roles = "ADMIN")]
-        public ResponseDto Put(ProductDto productDto)
+        public ResponseDto Put(ProductDto ProductDto)
         {
             try
             {
-                Product product = _mapper.Map<Product>(productDto);
+                Product product = _mapper.Map<Product>(ProductDto);
 
-                if (productDto.Image != null)
+                if (ProductDto.Image != null)
                 {
-                    // we want to upload a new image, so we need to remove the old one
                     if (!string.IsNullOrEmpty(product.ImageLocalPath))
                     {
                         var oldFilePathDirectory = Path.Combine(Directory.GetCurrentDirectory(), product.ImageLocalPath);
-                        FileInfo fileInfo = new FileInfo(oldFilePathDirectory);
-
-                        if (fileInfo.Exists)
+                        FileInfo file = new FileInfo(oldFilePathDirectory);
+                        if (file.Exists)
                         {
-                            fileInfo.Delete();
+                            file.Delete();
                         }
                     }
 
-                    string fileName = product.ProductId + Path.GetExtension(productDto.Image.FileName);
+                    string fileName = product.ProductId + Path.GetExtension(ProductDto.Image.FileName);
                     string filePath = @"wwwroot\ProductImages\" + fileName;
                     var filePathDirectory = Path.Combine(Directory.GetCurrentDirectory(), filePath);
-
                     using (var fileStream = new FileStream(filePathDirectory, FileMode.Create))
                     {
-                        productDto.Image.CopyTo(fileStream);
+                        ProductDto.Image.CopyTo(fileStream);
                     }
-
                     var baseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host.Value}{HttpContext.Request.PathBase.Value}";
                     product.ImageUrl = baseUrl + "/ProductImages/" + fileName;
                     product.ImageLocalPath = filePath;
                 }
 
-                _appDbContext.Products.Update(product);
 
+                _appDbContext.Products.Update(product);
                 _appDbContext.SaveChanges();
 
-                _responseDto.Result = _mapper.Map<Product>(productDto);
+                _responseDto.Result = _mapper.Map<ProductDto>(product);
             }
             catch (Exception ex)
             {
