@@ -138,8 +138,8 @@ namespace Mango.Services.ProductAPI.Controllers
                 {
                     if (!string.IsNullOrEmpty(product.ImageLocalPath))
                     {
-                        var oldFilePathDirectory = Path.Combine(Directory.GetCurrentDirectory(), product.ImageLocalPath);
-                        FileInfo file = new FileInfo(oldFilePathDirectory);
+                        var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", product.ImageLocalPath);
+                        FileInfo file = new FileInfo(oldFilePath);
                         if (file.Exists)
                         {
                             file.Delete();
@@ -147,17 +147,20 @@ namespace Mango.Services.ProductAPI.Controllers
                     }
 
                     string fileName = product.ProductId + Path.GetExtension(ProductDto.Image.FileName);
-                    string filePath = @"wwwroot\ProductImages\" + fileName;
-                    var filePathDirectory = Path.Combine(Directory.GetCurrentDirectory(), filePath);
+                    string filePath = Path.Combine("ProductImages", fileName);
+
+                    var wwwrootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+                    var filePathDirectory = Path.Combine(wwwrootPath, filePath);
+
                     using (var fileStream = new FileStream(filePathDirectory, FileMode.Create))
                     {
                         ProductDto.Image.CopyTo(fileStream);
                     }
+
                     var baseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host.Value}{HttpContext.Request.PathBase.Value}";
                     product.ImageUrl = baseUrl + "/ProductImages/" + fileName;
                     product.ImageLocalPath = filePath;
                 }
-
 
                 _appDbContext.Products.Update(product);
                 _appDbContext.SaveChanges();
@@ -171,6 +174,7 @@ namespace Mango.Services.ProductAPI.Controllers
             }
             return _responseDto;
         }
+
 
         [HttpDelete]
         [Route("{id:int}")]
